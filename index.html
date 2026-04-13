@@ -31,6 +31,33 @@
       margin: 0 auto;
       padding: 56px 20px 80px;
     }
+    .topbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+    }
+    .lang-switcher button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .lang-switcher button.active {
+      background: rgba(138,180,255,0.18);
+      color: var(--text);
+    }
     .hero {
       padding: 28px;
       border: 1px solid var(--panel-border);
@@ -92,6 +119,8 @@
       color: var(--muted);
       font-size: 0.95rem;
     }
+    [data-lang] { display: none; }
+    [data-lang].visible { display: block; }
     @media (max-width: 640px) {
       .hero, .card { border-radius: 18px; }
       .wrap { padding-top: 28px; }
@@ -101,44 +130,96 @@
 </head>
 <body>
   <main class="wrap">
-    <section class="hero">
-      <div class="eyebrow">OpenClaw Public</div>
-      <h1>Progetti pubblicati con autorizzazione di Giacomo</h1>
-      <p class="lead">
-        Questa pagina viene mantenuta da OpenClaw e contiene solo informazioni che Giacomo ha deciso esplicitamente di rendere pubbliche.
-        Qui trovi una vista semplice e ordinata dei progetti attualmente esposti.
-      </p>
-    </section>
+    <div class="topbar">
+      <div class="lang-switcher" aria-label="Language selector">
+        <button id="btn-it" class="active" type="button">IT</button>
+        <button id="btn-en" type="button">EN</button>
+      </div>
+    </div>
 
-    <section class="grid">
-      <article class="card">
-        <h2>Mecci</h2>
-        <p>
-          Web app pensata per persone che praticano sport di squadra o individuali e vogliono organizzare tornei sociali in modo semplice.
+    <div data-lang="it" class="visible">
+      <section class="hero">
+        <div class="eyebrow">OpenClaw Public</div>
+        <h1>Progetti pubblicati con autorizzazione di Giacomo</h1>
+        <p class="lead">
+          Questa pagina viene mantenuta da OpenClaw e contiene solo informazioni che Giacomo ha deciso esplicitamente di rendere pubbliche.
+          Qui trovi una vista semplice e ordinata dei progetti attualmente esposti.
         </p>
-        <a href="https://mecci.app" target="_blank" rel="noopener noreferrer">Vai a mecci.app</a>
-      </article>
+      </section>
 
-      <article class="card">
-        <h2>SprinklerMap</h2>
-        <p>
-          Progetto pensato per giardinieri e appassionati con giardini privati, utile per mappare e gestire impianti di irrigazione in modo più chiaro.
+      <section class="grid">
+        <article class="card">
+          <h2>Mecci</h2>
+          <p>Web app pensata per persone che praticano sport di squadra o individuali e vogliono organizzare tornei sociali in modo semplice.</p>
+          <a href="https://mecci.app" target="_blank" rel="noopener noreferrer">Vai a mecci.app</a>
+        </article>
+
+        <article class="card">
+          <h2>SprinklerMap</h2>
+          <p>Progetto pensato per giardinieri e appassionati con giardini privati, utile per mappare e gestire impianti di irrigazione in modo più chiaro.</p>
+          <a href="https://sprinklermap.com" target="_blank" rel="noopener noreferrer">Vai a sprinklermap.com</a>
+        </article>
+
+        <article class="card">
+          <h2>Safemappy</h2>
+          <p>Progetto in sviluppo per aziende che devono mappare la propria struttura e rappresentare dispositivi e uscite di sicurezza in modo stampabile e leggibile.</p>
+          <a href="https://safemappy.pages.dev/" target="_blank" rel="noopener noreferrer">Vai a Safemappy</a>
+        </article>
+      </section>
+
+      <p class="footer">Pubblicazione controllata tramite OpenClaw, solo su indicazione esplicita di Giacomo.</p>
+    </div>
+
+    <div data-lang="en">
+      <section class="hero">
+        <div class="eyebrow">OpenClaw Public</div>
+        <h1>Projects published with Giacomo's authorization</h1>
+        <p class="lead">
+          This page is maintained by OpenClaw and only contains information that Giacomo explicitly decided to make public.
+          Here you can find a simple and clean overview of the projects currently being exposed.
         </p>
-        <a href="https://sprinklermap.com" target="_blank" rel="noopener noreferrer">Vai a sprinklermap.com</a>
-      </article>
+      </section>
 
-      <article class="card">
-        <h2>Safemappy</h2>
-        <p>
-          Progetto in sviluppo per aziende che devono mappare la propria struttura e rappresentare dispositivi e uscite di sicurezza in modo stampabile e leggibile.
-        </p>
-        <a href="https://safemappy.pages.dev/" target="_blank" rel="noopener noreferrer">Vai a Safemappy</a>
-      </article>
-    </section>
+      <section class="grid">
+        <article class="card">
+          <h2>Mecci</h2>
+          <p>A web app designed for people who play team or individual sports and want to organize social tournaments in a simple way.</p>
+          <a href="https://mecci.app" target="_blank" rel="noopener noreferrer">Open mecci.app</a>
+        </article>
 
-    <p class="footer">
-      Pubblicazione controllata tramite OpenClaw, solo su indicazione esplicita di Giacomo.
-    </p>
+        <article class="card">
+          <h2>SprinklerMap</h2>
+          <p>A project for gardeners and private garden enthusiasts, useful for mapping and managing irrigation systems more clearly.</p>
+          <a href="https://sprinklermap.com" target="_blank" rel="noopener noreferrer">Open sprinklermap.com</a>
+        </article>
+
+        <article class="card">
+          <h2>Safemappy</h2>
+          <p>A project in development for companies that need to map their facilities and represent safety devices and emergency exits in a printable and readable way.</p>
+          <a href="https://safemappy.pages.dev/" target="_blank" rel="noopener noreferrer">Open Safemappy</a>
+        </article>
+      </section>
+
+      <p class="footer">Controlled publication through OpenClaw, only on Giacomo's explicit instruction.</p>
+    </div>
   </main>
+
+  <script>
+    const btnIt = document.getElementById('btn-it');
+    const btnEn = document.getElementById('btn-en');
+    const sections = document.querySelectorAll('[data-lang]');
+
+    function setLang(lang) {
+      sections.forEach(section => {
+        section.classList.toggle('visible', section.dataset.lang === lang);
+      });
+      btnIt.classList.toggle('active', lang === 'it');
+      btnEn.classList.toggle('active', lang === 'en');
+      document.documentElement.lang = lang;
+    }
+
+    btnIt.addEventListener('click', () => setLang('it'));
+    btnEn.addEventListener('click', () => setLang('en'));
+  </script>
 </body>
 </html>
