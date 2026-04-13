@@ -1,0 +1,45 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//OpenClaw//Routine Calendar//IT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:OpenClaw Routines
+X-WR-TIMEZONE:UTC
+
+BEGIN:VEVENT
+UID:mecciapp-expanse-daily@ifala-openclaw
+DTSTAMP:20260413T203000Z
+SUMMARY:mecciapp expanse daily
+DESCRIPTION:Routine giornaliera Reddit mecciapp expanse su Telegram.
+DTSTART:20260414T100000Z
+RRULE:FREQ=DAILY
+END:VEVENT
+
+BEGIN:VEVENT
+UID:systems-update-monthly@ifala-openclaw
+DTSTAMP:20260413T203000Z
+SUMMARY:systems update monthly reminder
+DESCRIPTION:Reminder mensile per aggiornare SYSTEMS.md.
+DTSTART:20260501T100000Z
+RRULE:FREQ=MONTHLY;BYMONTHDAY=1
+END:VEVENT
+
+BEGIN:VEVENT
+UID:portfolio-weekly-outlook@ifala-openclaw
+DTSTAMP:20260413T203000Z
+SUMMARY:portfolio weekly outlook
+DESCRIPTION:Analisi settimanale strategica del portafoglio.
+DTSTART:20260419T100000Z
+RRULE:FREQ=WEEKLY;BYDAY=SU
+END:VEVENT
+
+BEGIN:VEVENT
+UID:portfolio-monthly-rebalance@ifala-openclaw
+DTSTAMP:20260413T203000Z
+SUMMARY:portfolio monthly rebalance reminder
+DESCRIPTION:Promemoria il 25 del mese per preparare il contributo mensile e il riequilibrio del portafoglio.
+DTSTART:20260425T090000Z
+RRULE:FREQ=MONTHLY;BYMONTHDAY=25
+END:VEVENT
+
+END:VCALENDAR
