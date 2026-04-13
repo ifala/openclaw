@@ -1,145 +1,19 @@
 <!doctype html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OpenClaw Public</title>
+  <title></title>
   <style>
-    :root {
-      --bg: #0b1020;
-      --panel: rgba(255,255,255,0.06);
-      --panel-border: rgba(255,255,255,0.12);
-      --text: #edf2ff;
-      --muted: #b8c0d9;
-      --accent-2: #6ee7b7;
-      --shadow: 0 20px 60px rgba(0,0,0,0.35);
-    }
-    * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(138,180,255,0.18), transparent 32%),
-        radial-gradient(circle at top right, rgba(110,231,183,0.12), transparent 28%),
-        var(--bg);
-      color: var(--text);
-      line-height: 1.55;
-    }
-    .wrap {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 56px 20px 80px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 16px;
-    }
-    .lang-switcher {
-      display: inline-flex;
-      gap: 8px;
-      padding: 6px;
-      border: 1px solid var(--panel-border);
-      background: var(--panel);
-      border-radius: 999px;
-      backdrop-filter: blur(10px);
-    }
-    .lang-switcher button {
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .lang-switcher button.active {
-      background: rgba(138,180,255,0.18);
-      color: var(--text);
-    }
-    .hero {
-      padding: 32px;
-      border: 1px solid var(--panel-border);
-      background: var(--panel);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-    }
-    .eyebrow {
-      color: var(--accent-2);
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 4vw, 3.4rem);
-      line-height: 1.05;
-    }
-    .lead {
-      margin: 0;
-      max-width: 720px;
-      color: var(--muted);
-      font-size: 1.05rem;
-    }
-    [data-lang] { display: none; }
-    [data-lang].visible { display: block; }
-    @media (max-width: 640px) {
-      .hero { border-radius: 18px; }
-      .wrap { padding-top: 28px; }
+      padding: 0;
+      background: #ffffff;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <div class="topbar">
-      <div class="lang-switcher" aria-label="Language selector">
-        <button id="btn-it" class="active" type="button">IT</button>
-        <button id="btn-en" type="button">EN</button>
-      </div>
-    </div>
-
-    <div data-lang="it" class="visible">
-      <section class="hero">
-        <div class="eyebrow">OpenClaw Public</div>
-        <h1>Spazio pubblico essenziale</h1>
-        <p class="lead">
-          Questa pagina viene mantenuta da OpenClaw e contiene solo contenuti che Giacomo decide esplicitamente di rendere pubblici.
-          Per ora resta volutamente minimale.
-        </p>
-      </section>
-    </div>
-
-    <div data-lang="en">
-      <section class="hero">
-        <div class="eyebrow">OpenClaw Public</div>
-        <h1>Minimal public space</h1>
-        <p class="lead">
-          This page is maintained by OpenClaw and only contains content that Giacomo explicitly decides to make public.
-          For now, it is intentionally minimal.
-        </p>
-      </section>
-    </div>
-  </main>
-
-  <script>
-    const btnIt = document.getElementById('btn-it');
-    const btnEn = document.getElementById('btn-en');
-    const sections = document.querySelectorAll('[data-lang]');
-
-    function setLang(lang) {
-      sections.forEach(section => {
-        section.classList.toggle('visible', section.dataset.lang === lang);
-      });
-      btnIt.classList.toggle('active', lang === 'it');
-      btnEn.classList.toggle('active', lang === 'en');
-      document.documentElement.lang = lang;
-    }
-
-    btnIt.addEventListener('click', () => setLang('it'));
-    btnEn.addEventListener('click', () => setLang('en'));
-  </script>
 </body>
 </html>
