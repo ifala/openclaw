@@ -90,11 +90,11 @@ document.getElementById('passwordInput').addEventListener('keydown', (e) => { if
       let html = `<div class="card hero"><h2 style="margin-bottom:8px;">${state.current.toUpperCase()}</h2><p class="muted">${reading.principle}</p><div class="list"><div class="list-item"><strong>Stato:</strong> ${reading.status}</div><div class="list-item"><strong>Collo di bottiglia:</strong> ${reading.bottleneck}</div><div class="list-item"><strong>Priorità:</strong> ${reading.action}</div></div></div>`;
       html += kpis.map(([label,value])=>`<div class="card kpi"><div class="muted small">${label}</div><div class="kpi-value">${typeof value==='number' && label.startsWith('Δ') ? value.toFixed(1)+'%' : (value ?? 'n/d')}</div></div>`).join('');
       if(state.current==='mecci'){
-        html += createChartSection('📊 Attività Utenti','chartUsers','DAU: utenti attivi nel giorno | WAU: utenti attivi negli ultimi 7 giorni | MAU: utenti attivi negli ultimi 30 giorni');
-        html += createChartSection('🏆 Tornei & Partecipanti','chartTournaments','Tournaments Created: tornei creati nel periodo | Participants Joined: iscrizioni ai tornei');
+        html += createChartSection('📊 Attività Utenti','chartUsers','DAU/WAU/MAU: utenti attivi nel giorno/7gg/30gg | Avg Participants/Tournament: media partecipanti per torneo');
+        html += createChartSection('🏆 Tornei & Partecipanti','chartTournaments','Tournaments Created: tornei creati | Participants Joined: iscrizioni | Active Organizers: organizzatori attivi | Tournaments w/ Participants: tornei con almeno 1 partecipante');
         html += createChartSection('🚀 Acquisizione','chartAcquisition','New Signups: nuovi utenti registrati nel periodo | New Organic/Referred: suddivisione per canale (se disponibile)');
         html += createChartSection('⚡ Attivazione','chartActivation','Activated Users: utenti che hanno creato o partecipato a un torneo | New Organizers: nuovi organizzatori (primo torneo)');
-        html += createChartSection('💰 Monetizzazione','chartRevenue','Paying Users: utenti paganti | MRR: ricorrente mensile | ARPU: ricavo medio per utente');
+        html += createChartSection('💰 Monetizzazione','chartRevenue','Paying Users: utenti paganti | MRR: ricorrente mensile | Free to Paid %: tasso conversione free→paid');
       } else {
         html += '<div class="card chart-big"><h3>Dati non disponibili</h3><p class="muted">Completa export metrics</p></div>';
       }
