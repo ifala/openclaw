@@ -54,8 +54,8 @@ document.getElementById('passwordInput').addEventListener('keydown', (e) => { if
         </div>
         ${kpis.map(([label,value])=>`<div class="card kpi"><div class="muted small">${label}</div><div class="kpi-value">${typeof value==='number' && label.startsWith('Δ') ? value.toFixed(1)+'%' : (value ?? 'n/d')}</div></div>`).join('')}
         <div class="card chart-big"><h3>Trend principale</h3><canvas id="mainChart"></canvas></div>
-        <div class="card chart-half"><h3>Attività utenti</h3><canvas id="userChart"></canvas></div>
-        <div class="card chart-half"><h3>Core actions</h3><canvas id="coreChart"></canvas></div>
+        <div class="card chart-big"><h3>Attività utenti</h3><canvas id="userChart"></canvas></div>
+        <div class="card chart-big"><h3>Core actions</h3><canvas id="coreChart"></canvas></div>
         <div class="card wide"><h3>Legenda metriche</h3><div class="list"><div class="list-item small"><strong>DAU</strong> = Daily Active Users, utenti attivi nel giorno dello snapshot.</div><div class="list-item small"><strong>WAU</strong> = Weekly Active Users, utenti attivi negli ultimi 7 giorni fino a quella data.</div><div class="list-item small"><strong>MAU</strong> = Monthly Active Users, utenti attivi negli ultimi 30 giorni fino a quella data.</div></div></div>
         <div class="card side"><h3>Stato dati</h3><div class="list"><div class="list-item"><span class="pill">${payload?.count||0} snapshot</span></div><div class="list-item small">Ultimo snapshot: ${latest?.snapshot_date||'n/d'}</div><div class="list-item small">Granularità: ${latest?.period?.granularity||'n/d'}</div><div class="list-item small warn">La protezione attuale resta un gate frontend leggero.</div></div></div>
         <div class="card chart-big"><h3>Note dataset</h3><div class="list">${((latest.notes||[]).slice(0,10)).map(n=>`<div class="list-item small">${n}</div>`).join('') || '<div class="list-item small muted">Nessuna nota disponibile</div>'}</div></div>
