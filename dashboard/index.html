@@ -32,7 +32,8 @@
     const state={current:'mecci',data:{}};
     let charts=[];
     async function sha256(text){const data=new TextEncoder().encode(text);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');}
-    document.getElementById('loginBtn').addEventListener('click', async()=>{const value=document.getElementById('passwordInput').value; const hash=await sha256(value); if(hash===PASSWORD_HASH){localStorage.setItem('openclaw_dashboard_auth','ok'); boot();} else {document.getElementById('loginError').textContent='Password errata';}});
+    document.getElementById('loginBtn').addEventListener('click', async()=>{const value=document.getElementById('passwordInput').value; const hash=await sha256(value); if(hash===PASSWORD_HASH){localStorage.setItem('openclaw_dashboard_auth','ok'); document.getElementById('loginView').style.display='none'; document.getElementById('appView').style.display='block'; await Promise.all(STARTUPS.map(async s=>{ try { await loadStartup(s); } catch { state.data[s]={snapshots:[],count:0,latest:null}; } })); renderTabs(); render();} else {document.getElementById('loginError').textContent='Password errata';}});
+document.getElementById('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
     async function loadStartup(startup){const res=await fetch(`${DATA_BASE}/${startup}.json`, {cache:'no-store'}); if(!res.ok) throw new Error('load failed'); state.data[startup]=await res.json();}
     function val(obj, path){try{return path.split('.').reduce((acc,key)=>acc?.[key],obj) ?? null;}catch{return null;}}
     function series(rows,path){return rows.map(r=>val(r,path));}
