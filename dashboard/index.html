@@ -72,7 +72,7 @@ document.getElementById('passwordInput').addEventListener('keydown', (e) => { if
       }
     }
     function chartOptions(){return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#eef2ff'}}},scales:{x:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)'}}}};}
-    function renderTabs(){const el=document.getElementById('tabs'); el.innerHTML=STARTUPS.map(s=>`<button class="tab ${s===state.current?'active':''}" data-startup="${s}">${s}</button>`).join(''); el.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{ state.current=btn.dataset.startup; renderTabs(); render(); });}
+    function renderTabs(){const el=document.getElementById('tabs'); el.innerHTML=STARTUPS.map(s=>`<button class="tab ${s===state.current?'active':''}" data-startup="${s}">${s}</button>`).join(''); el.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{ state.current=btn.dataset.startup; renderTabs(); render(); }));}
     async function boot(){const authed=localStorage.getItem('openclaw_dashboard_auth')==='ok'; if(!authed) return; document.getElementById('loginView').style.display='none'; document.getElementById('appView').style.display='block'; await Promise.all(STARTUPS.map(async s=>{ try { await loadStartup(s); } catch { state.data[s]={snapshots:[],count:0,latest:null}; } })); renderTabs(); render();}
     boot();
   </script>
