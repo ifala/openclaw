@@ -21,6 +21,7 @@
     .list{display:grid;gap:10px;} .list-item{padding:12px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);} .pill{display:inline-block;font-size:.82rem;font-weight:700;padding:4px 8px;border-radius:999px;background:rgba(126,240,200,.12);color:var(--accent2);} canvas{width:100%!important;height:360px!important;}
     @media (max-width: 980px){ .kpi,.chart-half,.side,.wide,.chart-big,.hero{grid-column:span 12;} }
   </style>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 </head>
 <body>
   <section class="login" id="loginView"><div class="login-card"><h1>Startup Dashboard</h1><p class="muted">Accesso protetto leggero. Utile come barriera minima, non come sicurezza forte.</p><input type="password" id="passwordInput" placeholder="Password" /><button id="loginBtn">Entra</button><div class="error" id="loginError"></div></div></section>
@@ -62,16 +63,92 @@ document.getElementById('passwordInput').addEventListener('keydown', (e) => { if
       `;
       const labels=rows.map(r=>r.snapshot_date);
       if(state.current==='mecci'){
-        addChart('mainChart','line',{labels,datasets:[{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#7cc4ff',tension:.25},{label:'Paying Users',data:series(rows,'revenue.paying_users'),borderColor:'#ff8f8f',tension:.25}]},chartOptions());
-        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25},{label:'WAU',data:series(rows,'engagement.wau'),borderColor:'#7ef0c8',tension:.25},{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#ffd37c',tension:.25}]},chartOptions());
-        addChart('coreChart','bar',{labels,datasets:[{label:'Tournaments Created',data:series(rows,'engagement.tournaments_created'),backgroundColor:'#7ef0c8'},{label:'Participants Joined',data:series(rows,'engagement.participants_joined'),backgroundColor:'#7cc4ff'}]},chartOptions());
+        addChart('mainChart','line',{labels,datasets:[{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#7cc4ff',tension:.25},{label:'Paying Users',data:series(rows,'revenue.paying_users'),borderColor:'#ff8f8f',tension:.25}]},chartOptions(labels));
+        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25},{label:'WAU',data:series(rows,'engagement.wau'),borderColor:'#7ef0c8',tension:.25},{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#ffd37c',tension:.25}]},chartOptions(labels));
+        addChart('coreChart','bar',{labels,datasets:[{label:'Tournaments Created',data:series(rows,'engagement.tournaments_created'),backgroundColor:'#7ef0c8'},{label:'Participants Joined',data:series(rows,'engagement.participants_joined'),backgroundColor:'#7cc4ff'}]},chartOptions(labels));
       } else {
-        addChart('mainChart','line',{labels,datasets:[{label:'Snapshot Count',data:rows.map((_,i)=>i+1),borderColor:'#7cc4ff',tension:.25}]},chartOptions());
-        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25}]},chartOptions());
-        addChart('coreChart','bar',{labels,datasets:[{label:'No data yet',data:rows.map(()=>0),backgroundColor:'#7ef0c8'}]},chartOptions());
+        addChart('mainChart','line',{labels,datasets:[{label:'Snapshot Count',data:rows.map((_,i)=>i+1),borderColor:'#7cc4ff',tension:.25}]},chartOptions(labels));
+        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25}]},chartOptions(labels));
+        addChart('coreChart','bar',{labels,datasets:[{label:'No data yet',data:rows.map(()=>0),backgroundColor:'#7ef0c8'}]},chartOptions(labels));
       }
     }
-    function chartOptions(){return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#eef2ff'}}},scales:{x:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)'}}}};}
+    function chartOptions(labels){
+      const monthBoundaries = [];
+      if(labels){
+        let currentMonth = '';
+        labels.forEach((label, idx) => {
+          const month = label.substring(0,7); // YYYY-MM
+          if(month !== currentMonth){
+            if(currentMonth !== '') monthBoundaries.push(idx);
+            currentMonth = month;
+          }
+        });
+      }
+      return {
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{
+          mode:'index',
+          intersect:false
+        },
+        plugins:{
+          legend:{labels:{color:'#eef2ff'}},
+          tooltip:{
+            backgroundColor:'rgba(18,26,49,0.95)',
+            titleColor:'#7cc4ff',
+            bodyColor:'#eef2ff',
+            borderColor:'rgba(255,255,255,0.1)',
+            borderWidth:1,
+            padding:12,
+            displayColors:true,
+            callbacks:{
+              label:function(context){
+                return context.dataset.label + ': ' + context.parsed.y;
+              }
+            }
+          },
+          annotation:{
+            annotations:monthBoundaries.reduce((acc, idx, i)=>{
+              acc['line'+i]={
+                type:'line',
+                xMin:idx-0.5,
+                xMax:idx-0.5,
+                borderColor:'rgba(255,255,255,0.15)',
+                borderWidth:1,
+                borderDash:[5,5]
+              };
+              return acc;
+            },{})
+          }
+        },
+        elements:{
+          point:{
+            radius:4,
+            hoverRadius:8,
+            hitRadius:12,
+            borderWidth:2,
+            hoverBorderWidth:3
+          },
+          line:{
+            borderWidth:2,
+            tension:0.3
+          }
+        },
+        scales:{
+          x:{
+            ticks:{color:'#aab4d6'},
+            grid:{
+              color:'rgba(255,255,255,.05)',
+              tickLength:10
+            }
+          },
+          y:{
+            ticks:{color:'#aab4d6'},
+            grid:{color:'rgba(255,255,255,.05)'}
+          }
+        }
+      };
+    }
     function renderTabs(){const el=document.getElementById('tabs'); el.innerHTML=STARTUPS.map(s=>`<button class="tab ${s===state.current?'active':''}" data-startup="${s}">${s}</button>`).join(''); el.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{ state.current=btn.dataset.startup; renderTabs(); render(); }));}
     async function boot(){const authed=localStorage.getItem('openclaw_dashboard_auth')==='ok'; if(!authed) return; document.getElementById('loginView').style.display='none'; document.getElementById('appView').style.display='block'; await Promise.all(STARTUPS.map(async s=>{ try { await loadStartup(s); } catch { state.data[s]={snapshots:[],count:0,latest:null}; } })); renderTabs(); render();}
     boot();
