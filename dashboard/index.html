@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OpenClaw Startup Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
   <style>
     :root { --bg:#0b1020; --panel:#121a31; --panel-2:#182240; --line:rgba(255,255,255,.08); --text:#eef2ff; --muted:#aab4d6; --accent:#7cc4ff; --accent2:#7ef0c8; --warn:#ffd37c; --danger:#ff8f8f; }
     * { box-sizing:border-box; }
@@ -17,16 +18,17 @@
     input,button{width:100%;border-radius:12px;border:1px solid var(--line);padding:12px 14px;font:inherit;} input{background:#0f1730;color:var(--text);margin-top:10px;} button{margin-top:14px;background:var(--accent);color:#08101d;font-weight:700;cursor:pointer;} .error{color:var(--danger);margin-top:10px;}
     .app{display:none;} .topbar{position:sticky;top:0;z-index:10;background:rgba(11,16,32,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);} .topbar-inner{max-width:1320px;margin:0 auto;padding:16px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
     .container{max-width:1320px;margin:0 auto;padding:24px 20px 60px;} .tabs{display:flex;gap:10px;flex-wrap:wrap;} .tab{padding:10px 14px;border-radius:999px;background:var(--panel-2);color:var(--muted);border:1px solid var(--line);cursor:pointer;} .tab.active{color:var(--text);background:#22315a;}
-    .grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr);} .card{padding:18px;grid-column:span 12;} .hero{grid-column:span 12;} .kpi{grid-column:span 3;} .kpi-value{font-size:2.15rem;font-weight:800;margin-bottom:6px;} .chart-big{grid-column:span 12;} .chart-half{grid-column:span 6;} .side{grid-column:span 4;} .wide{grid-column:span 8;}
-    .list{display:grid;gap:10px;} .list-item{padding:12px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);} .pill{display:inline-block;font-size:.82rem;font-weight:700;padding:4px 8px;border-radius:999px;background:rgba(126,240,200,.12);color:var(--accent2);} canvas{width:100%!important;height:360px!important;}
-    @media (max-width: 980px){ .kpi,.chart-half,.side,.wide,.chart-big,.hero{grid-column:span 12;} }
+    .grid{display:grid;gap:20px;grid-template-columns:repeat(12,1fr);} .card{padding:18px;grid-column:span 12;} .hero{grid-column:span 12;} .kpi{grid-column:span 3;} .kpi-value{font-size:2.15rem;font-weight:800;margin-bottom:6px;} .chart-big{grid-column:span 12;} .side{grid-column:span 4;} .wide{grid-column:span 8;}
+    .list{display:grid;gap:10px;} .list-item{padding:12px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);} .pill{display:inline-block;font-size:.82rem;font-weight:700;padding:4px 8px;border-radius:999px;background:rgba(126,240,200,.12);color:var(--accent2);} canvas{width:100%!important;height:320px!important;}
+    .chart-section{margin-bottom:12px;} .chart-title{font-size:1.1rem;font-weight:600;margin-bottom:8px;color:var(--accent);} .chart-desc{font-size:.85rem;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--line);}
+    @media (max-width: 980px){ .kpi,.chart-big,.side,.wide,.hero{grid-column:span 12;} }
   </style>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 </head>
 <body>
   <section class="login" id="loginView"><div class="login-card"><h1>Startup Dashboard</h1><p class="muted">Accesso protetto leggero. Utile come barriera minima, non come sicurezza forte.</p><input type="password" id="passwordInput" placeholder="Password" /><button id="loginBtn">Entra</button><div class="error" id="loginError"></div></div></section>
   <section class="app" id="appView"><div class="topbar"><div class="topbar-inner"><div><h2 style="margin:0;">OpenClaw Startup Dashboard</h2><div class="muted small">Dashboard multi-startup con lettura orientata a crescita, chiarezza e decisioni da founder.</div></div><div class="tabs" id="tabs"></div></div></div><div class="container"><div class="grid" id="dashboard"></div></div></section>
   <script>
+
     const PASSWORD_HASH='ba7d4ed4d7f0291976ebdc2f5329d6e0af4b9be14b8cc306dfb67c485fece067';
     const STARTUPS=['mecci','sprinklermap','safemappy'];
     const DATA_BASE='./data';
@@ -39,118 +41,75 @@ document.getElementById('passwordInput').addEventListener('keydown', (e) => { if
     function val(obj, path){try{return path.split('.').reduce((acc,key)=>acc?.[key],obj) ?? null;}catch{return null;}}
     function series(rows,path){return rows.map(r=>val(r,path) ?? 0);}
     function pctDelta(rows,path,days){if(rows.length<=days) return null; const latest=val(rows[rows.length-1],path); const prev=val(rows[rows.length-1-days],path); if(latest==null||prev==null||prev===0) return null; return ((latest-prev)/prev)*100;}
-    function pgReading(startup, rows){const latest=rows[rows.length-1]||{}; if(startup==='mecci'){return { status:'Mecci oggi non mostra ancora crescita convincente di uso core.', bottleneck:'Il collo di bottiglia sembra l’attivazione/uso reale, non il numero di paganti storico.', action:'La priorità founder è aumentare il comportamento ripetuto che conta: creazione tornei, partecipazione e ritorno utenti.', principle:'Principio PG: startup = growth. Se il core usage non cresce, il resto è secondario.'}; } return { status:`${startup} non ha ancora dati disponibili o integrati.`, bottleneck:'Serve pipeline dati prima di fare letture serie.', action:'Completa l’export metrics con schema coerente.', principle:'Principio PG: misura prima la verità d’uso, poi decidi.'}; }
+    function pgReading(startup, rows){const latest=rows[rows.length-1]||{}; if(startup==='mecci'){return { status:'Mecci oggi non mostra ancora crescita convincente di uso core.', bottleneck:'Il collo di bottiglia sembra attivazione/uso reale, non il numero di paganti storico.', action:'La priorità founder è aumentare il comportamento ripetuto che conta: creazione tornei, partecipazione e ritorno utenti.', principle:'Principio PG: startup = growth. Se il core usage non cresce, il resto è secondario.'}; } return { status:`${startup} non ha ancora dati disponibili o integrati.`, bottleneck:'Serve pipeline dati prima di fare letture serie.', action:'Completa export metrics con schema coerente.', principle:'Principio PG: misura prima la verità d uso, poi decidi.'}; }
     function destroyCharts(){charts.forEach(c=>c.destroy()); charts=[];}
     function addChart(id,type,data,options){const ctx=document.getElementById(id); const c=new Chart(ctx,{type,data,options}); charts.push(c);}
-    function render(){destroyCharts(); const payload=state.data[state.current]||{snapshots:[]}; const rows=payload.snapshots||[]; const latest=payload.latest||{}; const e=latest.engagement||{}; const r=latest.revenue||{}; const reading=pgReading(state.current,rows); const dashboard=document.getElementById('dashboard'); const kpis = state.current==='mecci' ? [ ['DAU', e.dau ?? 0], ['WAU', e.wau ?? 0], ['MAU', e.mau ?? 0], ['Paying Users', r.paying_users ?? 0], ['Δ MAU 7g', pctDelta(rows,'engagement.mau',7)], ['Δ MAU 30g', pctDelta(rows,'engagement.mau',30)] ] : [ ['Snapshot', latest?.snapshot_date], ['Count', payload?.count], ['Granularity', latest?.period?.granularity], ['Status', 'n/d'] ];
-      dashboard.innerHTML = `
-        <div class="card hero">
-          <h2 style="margin-bottom:8px;">${state.current.toUpperCase()}</h2>
-          <p class="muted">${reading.principle}</p>
-          <div class="list">
-            <div class="list-item"><strong>Stato:</strong> ${reading.status}</div>
-            <div class="list-item"><strong>Collo di bottiglia:</strong> ${reading.bottleneck}</div>
-            <div class="list-item"><strong>Priorità suggerita:</strong> ${reading.action}</div>
-          </div>
-        </div>
-        ${kpis.map(([label,value])=>`<div class="card kpi"><div class="muted small">${label}</div><div class="kpi-value">${typeof value==='number' && label.startsWith('Δ') ? value.toFixed(1)+'%' : (value ?? 'n/d')}</div></div>`).join('')}
-        <div class="card chart-big"><h3>Trend principale</h3><canvas id="mainChart"></canvas></div>
-        <div class="card chart-big"><h3>Attività utenti</h3><canvas id="userChart"></canvas></div>
-        <div class="card chart-big"><h3>Core actions</h3><canvas id="coreChart"></canvas></div>
-        <div class="card wide"><h3>Legenda metriche</h3><div class="list"><div class="list-item small"><strong>DAU</strong> = Daily Active Users, utenti attivi nel giorno dello snapshot.</div><div class="list-item small"><strong>WAU</strong> = Weekly Active Users, utenti attivi negli ultimi 7 giorni fino a quella data.</div><div class="list-item small"><strong>MAU</strong> = Monthly Active Users, utenti attivi negli ultimi 30 giorni fino a quella data.</div></div></div>
-        <div class="card side"><h3>Stato dati</h3><div class="list"><div class="list-item"><span class="pill">${payload?.count||0} snapshot</span></div><div class="list-item small">Ultimo snapshot: ${latest?.snapshot_date||'n/d'}</div><div class="list-item small">Granularità: ${latest?.period?.granularity||'n/d'}</div><div class="list-item small warn">La protezione attuale resta un gate frontend leggero.</div></div></div>
-        <div class="card chart-big"><h3>Note dataset</h3><div class="list">${((latest.notes||[]).slice(0,10)).map(n=>`<div class="list-item small">${n}</div>`).join('') || '<div class="list-item small muted">Nessuna nota disponibile</div>'}</div></div>
-      `;
-      const labels=rows.map(r=>r.snapshot_date);
-      if(state.current==='mecci'){
-        addChart('mainChart','line',{labels,datasets:[{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#7cc4ff',tension:.25},{label:'Paying Users',data:series(rows,'revenue.paying_users'),borderColor:'#ff8f8f',tension:.25}]},chartOptions(labels));
-        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25},{label:'WAU',data:series(rows,'engagement.wau'),borderColor:'#7ef0c8',tension:.25},{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#ffd37c',tension:.25}]},chartOptions(labels));
-        addChart('coreChart','bar',{labels,datasets:[{label:'Tournaments Created',data:series(rows,'engagement.tournaments_created'),backgroundColor:'#7ef0c8'},{label:'Participants Joined',data:series(rows,'engagement.participants_joined'),backgroundColor:'#7cc4ff'}]},chartOptions(labels));
-      } else {
-        addChart('mainChart','line',{labels,datasets:[{label:'Snapshot Count',data:rows.map((_,i)=>i+1),borderColor:'#7cc4ff',tension:.25}]},chartOptions(labels));
-        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25}]},chartOptions(labels));
-        addChart('coreChart','bar',{labels,datasets:[{label:'No data yet',data:rows.map(()=>0),backgroundColor:'#7ef0c8'}]},chartOptions(labels));
-      }
-    }
-    function chartOptions(labels){
-      const monthBoundaries = [];
-      if(labels){
+
+    function chartOptions(labels,monthBoundaries=true){
+      const boundaries = [];
+      if(monthBoundaries && labels){
         let currentMonth = '';
         labels.forEach((label, idx) => {
-          const month = label.substring(0,7); // YYYY-MM
+          const month = label.substring(0,7);
           if(month !== currentMonth){
-            if(currentMonth !== '') monthBoundaries.push(idx);
+            if(currentMonth !== '') boundaries.push(idx);
             currentMonth = month;
           }
         });
       }
       return {
-        responsive:true,
-        maintainAspectRatio:false,
-        interaction:{
-          mode:'index',
-          intersect:false
-        },
+        responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         plugins:{
           legend:{labels:{color:'#eef2ff'}},
-          tooltip:{
-            backgroundColor:'rgba(18,26,49,0.95)',
-            titleColor:'#7cc4ff',
-            bodyColor:'#eef2ff',
-            borderColor:'rgba(255,255,255,0.1)',
-            borderWidth:1,
-            padding:12,
-            displayColors:true,
-            callbacks:{
-              label:function(context){
-                return context.dataset.label + ': ' + context.parsed.y;
-              }
-            }
-          },
-          annotation:{
-            annotations:monthBoundaries.reduce((acc, idx, i)=>{
-              acc['line'+i]={
-                type:'line',
-                xMin:idx-0.5,
-                xMax:idx-0.5,
-                borderColor:'rgba(255,255,255,0.15)',
-                borderWidth:1,
-                borderDash:[5,5]
-              };
-              return acc;
-            },{})
-          }
+          tooltip:{backgroundColor:'rgba(18,26,49,0.95)',titleColor:'#7cc4ff',bodyColor:'#eef2ff',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:12,displayColors:true},
+          annotation:{annotations:boundaries.reduce((acc, idx, i)=>{acc['line'+i]={type:'line',xMin:idx-0.5,xMax:idx-0.5,borderColor:'rgba(255,255,255,0.15)',borderWidth:1,borderDash:[5,5]};return acc;},{})}
         },
-        elements:{
-          point:{
-            radius:4,
-            hoverRadius:8,
-            hitRadius:12,
-            borderWidth:2,
-            hoverBorderWidth:3
-          },
-          line:{
-            borderWidth:2,
-            tension:0.3
-          }
-        },
-        scales:{
-          x:{
-            ticks:{color:'#aab4d6'},
-            grid:{
-              color:'rgba(255,255,255,.05)',
-              tickLength:10
-            }
-          },
-          y:{
-            ticks:{color:'#aab4d6'},
-            grid:{color:'rgba(255,255,255,.05)'}
-          }
-        }
+        elements:{point:{radius:4,hoverRadius:8,hitRadius:12,borderWidth:2,hoverBorderWidth:3},line:{borderWidth:2,tension:0.3}},
+        scales:{x:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)',tickLength:10}},y:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)'}}}
       };
     }
-    function renderTabs(){const el=document.getElementById('tabs'); el.innerHTML=STARTUPS.map(s=>`<button class="tab ${s===state.current?'active':''}" data-startup="${s}">${s}</button>`).join(''); el.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{ state.current=btn.dataset.startup; renderTabs(); render(); }));}
-    async function boot(){const authed=localStorage.getItem('openclaw_dashboard_auth')==='ok'; if(!authed) return; document.getElementById('loginView').style.display='none'; document.getElementById('appView').style.display='block'; await Promise.all(STARTUPS.map(async s=>{ try { await loadStartup(s); } catch { state.data[s]={snapshots:[],count:0,latest:null}; } })); renderTabs(); render();}
+    function createChartSection(title, chartId, desc){
+      return `<div class="card chart-big chart-section"><div class="chart-title">${title}</div><canvas id="${chartId}"></canvas><div class="chart-desc">${desc}</div></div>`;
+    }
+    function render(){
+      destroyCharts();
+      const payload=state.data[state.current]||{snapshots:[]};
+      const rows=payload.snapshots||[];
+      const latest=payload.latest||{};
+      const e=latest.engagement||{};
+      const r=latest.revenue||{};
+      const reading=pgReading(state.current,rows);
+      const dashboard=document.getElementById('dashboard');
+      const kpis = state.current==='mecci' ? [
+        ['DAU', e.dau ?? 0],['WAU', e.wau ?? 0],['MAU', e.mau ?? 0],
+        ['Paying Users', r.paying_users ?? 0],
+        ['Δ MAU 7g', pctDelta(rows,'engagement.mau',7)],
+        ['Δ MAU 30g', pctDelta(rows,'engagement.mau',30)]
+      ] : [['Snapshot', latest?.snapshot_date],['Count', payload?.count],['Granularity', latest?.period?.granularity],['Status', 'n/d']];
+      const labels=rows.map(r=>r.snapshot_date);
+      let html = `<div class="card hero"><h2 style="margin-bottom:8px;">${state.current.toUpperCase()}</h2><p class="muted">${reading.principle}</p><div class="list"><div class="list-item"><strong>Stato:</strong> ${reading.status}</div><div class="list-item"><strong>Collo di bottiglia:</strong> ${reading.bottleneck}</div><div class="list-item"><strong>Priorità:</strong> ${reading.action}</div></div></div>`;
+      html += kpis.map(([label,value])=>`<div class="card kpi"><div class="muted small">${label}</div><div class="kpi-value">${typeof value==='number' && label.startsWith('Δ') ? value.toFixed(1)+'%' : (value ?? 'n/d')}</div></div>`).join('');
+      if(state.current==='mecci'){
+        html += createChartSection('📊 Attività Utenti','chartUsers','DAU: utenti attivi nel giorno | WAU: utenti attivi negli ultimi 7 giorni | MAU: utenti attivi negli ultimi 30 giorni');
+        html += createChartSection('🏆 Tornei & Partecipanti','chartTournaments','Tournaments Created: tornei creati nel periodo | Participants Joined: iscrizioni ai tornei');
+        html += createChartSection('🚀 Acquisizione','chartAcquisition','New Signups: nuovi utenti registrati nel periodo | New Organic/Referred: suddivisione per canale (se disponibile)');
+        html += createChartSection('⚡ Attivazione','chartActivation','Activated Users: utenti che hanno creato o partecipato a un torneo | New Organizers: nuovi organizzatori (primo torneo)');
+        html += createChartSection('💰 Monetizzazione','chartRevenue','Paying Users: utenti paganti | MRR: ricorrente mensile | ARPU: ricavo medio per utente');
+      } else {
+        html += '<div class="card chart-big"><h3>Dati non disponibili</h3><p class="muted">Completa export metrics</p></div>';
+      }
+      html += '<div class="card side"><h3>Stato Dati</h3><div class="list"><div class="list-item"><span class="pill">'+(payload.count||0)+' snapshot</span></div><div class="list-item small">Ultimo: '+(latest.snapshot_date||'n/d')+'</div><div class="list-item small">Granularità: '+(latest?.period?.granularity||'n/d')+'</div></div></div>';
+      dashboard.innerHTML = html;
+      if(state.current==='mecci'){
+        addChart('chartUsers','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',backgroundColor:'#7cc4ff20',fill:true},{label:'WAU',data:series(rows,'engagement.wau'),borderColor:'#7ef0c8',backgroundColor:'#7ef0c820',fill:true},{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#ffd37c',backgroundColor:'#ffd37c20',fill:true}]},chartOptions(labels));
+        addChart('chartTournaments','line',{labels,datasets:[{label:'Tournaments',data:series(rows,'engagement.tournaments_created'),borderColor:'#7ef0c8',backgroundColor:'#7ef0c820',fill:true},{label:'Participants',data:series(rows,'engagement.participants_joined'),borderColor:'#7cc4ff',backgroundColor:'#7cc4ff20',fill:true}]},chartOptions(labels));
+        addChart('chartAcquisition','line',{labels,datasets:[{label:'New Signups',data:series(rows,'acquisition.new_signups'),borderColor:'#ff8f8f',backgroundColor:'#ff8f8f20',fill:true}]},chartOptions(labels));
+        addChart('chartActivation','line',{labels,datasets:[{label:'Activated',data:series(rows,'activation.activated_users'),borderColor:'#ffd37c',backgroundColor:'#ffd37c20',fill:true},{label:'New Organizers',data:series(rows,'activation.new_organizers'),borderColor:'#7cc4ff',backgroundColor:'#7cc4ff20',fill:true}]},chartOptions(labels));
+        addChart('chartRevenue','line',{labels,datasets:[{label:'Paying Users',data:series(rows,'revenue.paying_users'),borderColor:'#ff8f8f',backgroundColor:'#ff8f8f20',fill:true},{label:'MRR',data:series(rows,'revenue.mrr'),borderColor:'#7ef0c8',backgroundColor:'#7ef0c820',fill:true}]},chartOptions(labels));
+      }
+    }
+    function renderTabs(){const el=document.getElementById('tabs');el.innerHTML=STARTUPS.map(s=>'<button class="tab '+(s===state.current?'active':'')+'" data-startup="'+s+'">'+s+'</button>').join('');el.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{state.current=btn.dataset.startup;renderTabs();render();}));}
+    async function boot(){if(localStorage.getItem('openclaw_dashboard_auth')!=='ok')return;document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='block';await Promise.all(STARTUPS.map(async s=>{try{await loadStartup(s);}catch{state.data[s]={snapshots:[],count:0,latest:null};}}));renderTabs();render();}
     boot();
   </script>
 </body>
