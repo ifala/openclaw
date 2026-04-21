@@ -41,40 +41,13 @@ document.getElementById('passwordInput').addEventListener('keydown', (e) => { if
     function pgReading(startup, rows){const latest=rows[rows.length-1]||{}; if(startup==='mecci'){return { status:'Mecci oggi non mostra ancora crescita convincente di uso core.', bottleneck:'Il collo di bottiglia sembra l’attivazione/uso reale, non il numero di paganti storico.', action:'La priorità founder è aumentare il comportamento ripetuto che conta: creazione tornei, partecipazione e ritorno utenti.', principle:'Principio PG: startup = growth. Se il core usage non cresce, il resto è secondario.'}; } return { status:`${startup} non ha ancora dati disponibili o integrati.`, bottleneck:'Serve pipeline dati prima di fare letture serie.', action:'Completa l’export metrics con schema coerente.', principle:'Principio PG: misura prima la verità d’uso, poi decidi.'}; }
     function destroyCharts(){charts.forEach(c=>c.destroy()); charts=[];}
     function addChart(id,type,data,options){const ctx=document.getElementById(id); const c=new Chart(ctx,{type,data,options}); charts.push(c);}
-    function render(){destroyCharts(); const payload=state.data[state.current]||{snapshots:[]}; const rows=payload.snapshots||[]; const latest=payload.latest||{}; const reading=pgReading(state.current,rows); const dashboard=document.getElementById('dashboard'); const kpis = state.current==='mecci' ? [ ['DAU', val(latest,'engagement.dau')], ['WAU', val(latest,'engagement.wau')], ['MAU', val(latest,'engagement.mau')], ['Paying Users', val(latest,'revenue.paying_users')], ['Δ MAU 7g', pctDelta(rows,'engagement.mau',7)], ['Δ MAU 30g', pctDelta(rows,'engagement.mau',30)] ] : [ ['Snapshot', latest.snapshot_date], ['Count', payload.count], ['Granularity', val(latest,'period.granularity')], ['Status', 'n/d'] ];
-      dashboard.innerHTML = `
-        <div class="card hero">
-          <h2 style="margin-bottom:8px;">${state.current.toUpperCase()}</h2>
-          <p class="muted">${reading.principle}</p>
-          <div class="list">
-            <div class="list-item"><strong>Stato:</strong> ${reading.status}</div>
-            <div class="list-item"><strong>Collo di bottiglia:</strong> ${reading.bottleneck}</div>
-            <div class="list-item"><strong>Priorità suggerita:</strong> ${reading.action}</div>
-          </div>
-        </div>
-        ${kpis.map(([label,value])=>`<div class="card kpi"><div class="muted small">${label}</div><div class="kpi-value">${typeof value==='number' && label.startsWith('Δ') ? value.toFixed(1)+'%' : (value ?? 'n/d')}</div></div>`).join('')}
-        <div class="card chart-big"><h3>Trend principale</h3><canvas id="mainChart"></canvas></div>
-        <div class="card chart-half"><h3>Attività utenti</h3><canvas id="userChart"></canvas></div>
-        <div class="card chart-half"><h3>Core actions</h3><canvas id="coreChart"></canvas></div>
-        <div class="card wide"><h3>Legenda metriche</h3><div class="list"><div class="list-item small"><strong>DAU</strong> = Daily Active Users, utenti attivi nel giorno dello snapshot.</div><div class="list-item small"><strong>WAU</strong> = Weekly Active Users, utenti attivi negli ultimi 7 giorni fino a quella data.</div><div class="list-item small"><strong>MAU</strong> = Monthly Active Users, utenti attivi negli ultimi 30 giorni fino a quella data.</div></div></div>
-        <div class="card side"><h3>Stato dati</h3><div class="list"><div class="list-item"><span class="pill">${payload.count||0} snapshot</span></div><div class="list-item small">Ultimo snapshot: ${latest.snapshot_date||'n/d'}</div><div class="list-item small">Granularità: ${val(latest,'period.granularity')||'n/d'}</div><div class="list-item small warn">La protezione attuale resta un gate frontend leggero.</div></div></div>
-        <div class="card chart-big"><h3>Note dataset</h3><div class="list">${((latest.notes||[]).slice(0,10)).map(n=>`<div class="list-item small">${n}</div>`).join('') || '<div class="list-item small muted">Nessuna nota disponibile</div>'}</div></div>
-      `;
-      const labels=rows.map(r=>r.snapshot_date);
-      if(state.current==='mecci'){
-        addChart('mainChart','line',{labels,datasets:[{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#7cc4ff',tension:.25},{label:'Paying Users',data:series(rows,'revenue.paying_users'),borderColor:'#ff8f8f',tension:.25}]},chartOptions());
-        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25},{label:'WAU',data:series(rows,'engagement.wau'),borderColor:'#7ef0c8',tension:.25},{label:'MAU',data:series(rows,'engagement.mau'),borderColor:'#ffd37c',tension:.25}]},chartOptions());
-        addChart('coreChart','bar',{labels,datasets:[{label:'Tournaments Created',data:series(rows,'engagement.tournaments_created'),backgroundColor:'#7ef0c8'},{label:'Participants Joined',data:series(rows,'engagement.participants_joined'),backgroundColor:'#7cc4ff'}]},chartOptions());
-      } else {
-        addChart('mainChart','line',{labels,datasets:[{label:'Snapshot Count',data:rows.map((_,i)=>i+1),borderColor:'#7cc4ff',tension:.25}]},chartOptions());
-        addChart('userChart','line',{labels,datasets:[{label:'DAU',data:series(rows,'engagement.dau'),borderColor:'#7cc4ff',tension:.25}]},chartOptions());
-        addChart('coreChart','bar',{labels,datasets:[{label:'No data yet',data:rows.map(()=>0),backgroundColor:'#7ef0c8'}]},chartOptions());
-      }
-    }
-    function chartOptions(){return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#eef2ff'}}},scales:{x:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#aab4d6'},grid:{color:'rgba(255,255,255,.05)'}}}};}
-    function renderTabs(){const el=document.getElementById('tabs'); el.innerHTML=STARTUPS.map(s=>`<button class="tab ${s===state.current?'active':''}" data-startup="${s}">${s}</button>`).join(''); el.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{ state.current=btn.dataset.startup; renderTabs(); render(); }));}
-    async function boot(){const authed=localStorage.getItem('openclaw_dashboard_auth')==='ok'; if(!authed) return; document.getElementById('loginView').style.display='none'; document.getElementById('appView').style.display='block'; await Promise.all(STARTUPS.map(async s=>{ try { await loadStartup(s); } catch { state.data[s]={snapshots:[],count:0,latest:null}; } })); renderTabs(); render();}
-    boot();
-  </script>
-</body>
-</html>
+            const e = latest.engagement || {};
+            const r = latest.revenue || {};
+            const kpis = state.current==='mecci' ? [
+              ['DAU', e.dau],
+              ['WAU', e.wau],
+              ['MAU', e.mau],
+              ['Paying Users', r.paying_users],
+              ['Δ MAU 7g', pctDelta(rows,'engagement.mau',7)],
+              ['Δ MAU 30g', pctDelta(rows,'engagement.mau',30)]
+            ]
