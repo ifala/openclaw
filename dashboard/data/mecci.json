@@ -4876,15 +4876,68 @@
         "mrr/arpu: no price data stored in DB (null)",
         "week_1_retention/week_4_retention: no cohort event table available (null)"
       ]
+    },
+    {
+      "startup": "mecci",
+      "snapshot_date": "2026-04-24",
+      "period": {
+        "from": "2026-04-24",
+        "to": "2026-04-24",
+        "granularity": "day"
+      },
+      "acquisition": {
+        "new_signups": 0,
+        "new_organic_users": null,
+        "new_referred_users": null,
+        "top_channels": []
+      },
+      "activation": {
+        "activated_users": null,
+        "activation_rate": null,
+        "new_organizers": null
+      },
+      "engagement": {
+        "dau": null,
+        "wau": null,
+        "mau": 2,
+        "tournaments_created": 0,
+        "active_organizers": null,
+        "participants_joined": 0,
+        "tournaments_with_participants": null,
+        "avg_participants_per_tournament": null
+      },
+      "retention": {
+        "week_1_retention": null,
+        "week_4_retention": null
+      },
+      "revenue": {
+        "mrr": null,
+        "paying_users": 28,
+        "free_to_paid_conversion_rate": 0.0482,
+        "arpu": null
+      },
+      "notes": [
+        "activated_users: distinct users (organizers + participants) who created or joined a tournament in the period",
+        "activation_rate: activated_users / new_signups for the same period",
+        "new_organizers: organizers who created their first-ever tournament in the period",
+        "dau/wau/mau: distinct users active (tournament creation or participation) in last 1/7/30 days",
+        "active_organizers: distinct organizer_ids with at least one tournament created in the period",
+        "participants_joined: rows inserted in tournament_participants in the period",
+        "tournaments_with_participants: tournaments created in the period with at least one registered participant",
+        "avg_participants_per_tournament: participants_joined / tournaments_created for the period",
+        "new_organic_users/new_referred_users: no channel attribution tracking in DB (null)",
+        "mrr/arpu: no price data stored in DB (null)",
+        "week_1_retention/week_4_retention: no cohort event table available (null)"
+      ]
     }
   ],
-  "count": 92,
+  "count": 93,
   "latest": {
     "startup": "mecci",
-    "snapshot_date": "2026-04-23",
+    "snapshot_date": "2026-04-24",
     "period": {
-      "from": "2026-04-23",
-      "to": "2026-04-23",
+      "from": "2026-04-24",
+      "to": "2026-04-24",
       "granularity": "day"
     },
     "acquisition": {
